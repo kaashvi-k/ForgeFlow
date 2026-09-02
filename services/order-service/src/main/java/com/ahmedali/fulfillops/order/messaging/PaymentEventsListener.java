@@ -105,7 +105,9 @@ public class PaymentEventsListener {
 
   private void dispatch(EventEnvelope envelope) {
     switch (envelope.eventType()) {
-      case "PaymentAuthorized" -> handlePaymentAuthorized(envelope);
+      case "QualityPassed" -> handleQualityPassed(envelope);
+      case "PaymentAuthorized" -> lifecycleTransaction.onPaymentAuthorized(envelope.aggregateId());
+      case "QualityFailed" -> handleQualityFailed(envelope);
       case "PaymentDeclined" -> handlePaymentDeclined(envelope);
       case "PaymentRefunded" ->
           cancellationTransaction.confirmPaymentRefund(
@@ -117,10 +119,24 @@ public class PaymentEventsListener {
     }
   }
 
-  private void handlePaymentAuthorized(EventEnvelope envelope) {
-    int technicalFailureCount = optionalInt(envelope.payload(), "precedingTechnicalFailureCount");
-    projectionUpdater.recordPaymentOutcome(envelope.aggregateId(), null, technicalFailureCount);
-    lifecycleTransaction.onPaymentAuthorized(envelope.aggregateId());
+  private void handleQualityPassed(EventEnvelope envelope) {
+    lifecycleTransaction.onQualityPassed(envelope.aggregateId());
+  }
+
+  private void handleQualityFailed(EventEnvelope envelope) {
+    String reasonDetail = optionalText(envelope.payload(), "reasonDetail");
+    String reasonCode = optionalText(envelope.payload(), "reasonCode");
+    cancellationTransaction.startOrMerge(
+        envelope.aggregateId(),
+        "system",
+        reasonDetail,
+        OrderCancellationReasonCode.QUALITY_FAILED,
+        /* inventoryReleaseRequired= */ true,
+        /* paymentRefundRequired= */ false,
+        /* fulfillmentCancelRequired= */ false,
+        envelope.correlationId(),
+        envelope.eventId(),
+        /* emitCancellationRequestedEvent= */ false);
   }
 
   private void handlePaymentDeclined(EventEnvelope envelope) {
@@ -134,12 +150,12 @@ public class PaymentEventsListener {
         "system",
         reasonDetail,
         OrderCancellationReasonCode.PAYMENT_DECLINED,
-        /* inventoryReleaseRequired= */ true,
-        /* paymentRefundRequired= */ false,
-        /* fulfillmentCancelRequired= */ false,
+        true,
+        false,
+        false,
         envelope.correlationId(),
         envelope.eventId(),
-        /* emitCancellationRequestedEvent= */ false);
+        false);
   }
 
   private static String optionalText(JsonNode payload, String field) {

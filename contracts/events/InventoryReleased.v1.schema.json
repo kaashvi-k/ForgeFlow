@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fulfillops.dev/contracts/events/InventoryReleased.v1.schema.json",
   "title": "InventoryReleased.v1",
-  "description": "Inventory Service released a prior reservation back to available stock, as compensation after a payment decline or a fulfillment cancellation.",
+  "description": "Inventory Service released a prior reservation back to available stock, as compensation after a quality failure or a fulfillment cancellation.",
   "allOf": [
     { "$ref": "EventEnvelope.v1.schema.json" },
     {
@@ -36,7 +36,7 @@
             },
             "reasonCode": {
               "type": "string",
-              "enum": ["PAYMENT_DECLINED", "FULFILLMENT_CANCELLED", "ORDER_CANCELLED"]
+              "enum": ["QUALITY_FAILED", "PAYMENT_DECLINED", "FULFILLMENT_CANCELLED", "ORDER_CANCELLED"]
             }
           }
         }

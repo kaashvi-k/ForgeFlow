@@ -97,7 +97,7 @@ class OperationsProjectionRebuildIT {
 
   private void driveToDelivered(UUID orderId) {
     inventoryEventsListener.onMessage(envelope("InventoryReserved", orderId, Map.of()));
-    paymentEventsListener.onMessage(envelope("PaymentAuthorized", orderId, Map.of()));
+    paymentEventsListener.onMessage(envelope("QualityPassed", orderId, Map.of()));
     fulfillmentEventsListener.onMessage(envelope("FulfillmentAssigned", orderId, Map.of()));
     for (String status : List.of("PICKING", "PACKED", "DISPATCHED", "DELIVERED")) {
       fulfillmentEventsListener.onMessage(
@@ -122,15 +122,15 @@ class OperationsProjectionRebuildIT {
     inventoryEventsListener.onMessage(envelope("InventoryReserved", orderId, Map.of()));
     paymentEventsListener.onMessage(
         envelope(
-            "PaymentDeclined",
+            "QualityFailed",
             orderId,
             Map.of(
                 "amount",
                 Map.of("currencyCode", "USD", "amount", "10.00"),
                 "reasonCode",
-                "SIMULATED_INSUFFICIENT_FUNDS",
-                "precedingTechnicalFailureCount",
-                2)));
+                "FAILED_INSPECTION",
+                "reasonDetail",
+                "inspection failed")));
     inventoryEventsListener.onMessage(envelope("InventoryReleased", orderId, Map.of()));
   }
 

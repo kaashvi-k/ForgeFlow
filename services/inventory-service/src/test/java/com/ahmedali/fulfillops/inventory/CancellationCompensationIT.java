@@ -42,8 +42,8 @@ class CancellationCompensationIT {
   @Autowired private ObjectMapper objectMapper;
 
   @Test
-  void paymentDeclinedReleasesAnExistingReservation() {
-    String sku = uniqueSku("PAYMENT-DECLINED");
+  void qualityFailedReleasesAnExistingReservation() {
+    String sku = uniqueSku("QUALITY-FAILED");
     seedStock(sku, 10);
     UUID orderId = UUID.randomUUID();
     reserve(orderId, sku, 4);
@@ -51,28 +51,32 @@ class CancellationCompensationIT {
 
     paymentDeclinedListener.onMessage(
         envelope(
-            "PaymentDeclined",
+            "QualityFailed",
             orderId,
             Map.of(
                 "amount",
                 Map.of("currencyCode", "USD", "amount", "9.99"),
                 "reasonCode",
-                "SIMULATED_CARD_DECLINED")));
+                "FAILED_INSPECTION",
+                "reasonDetail",
+                "inspection failed")));
 
     assertThat(availableQuantity(sku)).isEqualTo(10);
   }
 
   @Test
-  void paymentDeclinedWithNoReservationIsANoOp() {
+  void qualityFailedWithNoReservationIsANoOp() {
     paymentDeclinedListener.onMessage(
         envelope(
-            "PaymentDeclined",
+            "QualityFailed",
             UUID.randomUUID(),
             Map.of(
                 "amount",
                 Map.of("currencyCode", "USD", "amount", "9.99"),
                 "reasonCode",
-                "SIMULATED_CARD_DECLINED")));
+                "FAILED_INSPECTION",
+                "reasonDetail",
+                "inspection failed")));
     // No exception, nothing to assert beyond "didn't throw" — there is no reservation to inspect.
   }
 

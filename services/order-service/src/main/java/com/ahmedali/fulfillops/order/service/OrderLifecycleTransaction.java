@@ -33,6 +33,7 @@ public class OrderLifecycleTransaction {
       List.of(
           OrderStatus.PENDING,
           OrderStatus.INVENTORY_RESERVED,
+          OrderStatus.QUALITY_PASSED,
           OrderStatus.PAYMENT_AUTHORIZED,
           OrderStatus.FULFILLMENT_ASSIGNED,
           OrderStatus.PICKING,
@@ -67,6 +68,16 @@ public class OrderLifecycleTransaction {
       return;
     }
     applyForward(order, OrderStatus.INVENTORY_RESERVED);
+  }
+
+  @Transactional
+  public void onQualityPassed(UUID orderId) {
+    Order order = orderRepository.findById(orderId).orElseThrow();
+    if (order.getStatus() == OrderStatus.CANCELLATION_PENDING) {
+      cancellationTransaction.foldInventoryReleaseRequirement(orderId);
+      return;
+    }
+    applyForward(order, OrderStatus.QUALITY_PASSED);
   }
 
   @Transactional

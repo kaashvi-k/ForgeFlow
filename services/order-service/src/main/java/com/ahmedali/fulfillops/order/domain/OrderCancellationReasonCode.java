@@ -7,6 +7,7 @@ package com.ahmedali.fulfillops.order.domain;
  * tracked by an OrderCancellation row.
  */
 public enum OrderCancellationReasonCode {
+  QUALITY_FAILED,
   PAYMENT_DECLINED,
   FULFILLMENT_CANCELLED,
   CUSTOMER_REQUESTED,

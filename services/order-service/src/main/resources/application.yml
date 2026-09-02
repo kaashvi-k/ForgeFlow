@@ -54,7 +54,7 @@ app:
       stage-thresholds:
         PENDING: PT15M
         INVENTORY_RESERVED: PT30M
-        PAYMENT_AUTHORIZED: PT30M
+        QUALITY_PASSED: PT30M
         FULFILLMENT_ASSIGNED: PT1H
         PICKING: PT4H
         PACKED: PT4H

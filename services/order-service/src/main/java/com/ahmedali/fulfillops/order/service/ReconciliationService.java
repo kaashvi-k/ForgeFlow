@@ -52,7 +52,7 @@ public class ReconciliationService {
       List.of(
           OrderStatus.PENDING,
           OrderStatus.INVENTORY_RESERVED,
-          OrderStatus.PAYMENT_AUTHORIZED,
+          OrderStatus.QUALITY_PASSED,
           OrderStatus.FULFILLMENT_ASSIGNED,
           OrderStatus.PICKING,
           OrderStatus.PACKED,

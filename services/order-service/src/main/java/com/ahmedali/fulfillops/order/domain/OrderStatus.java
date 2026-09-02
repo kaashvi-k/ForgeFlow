@@ -6,6 +6,7 @@ import java.util.List;
 public enum OrderStatus {
   PENDING,
   INVENTORY_RESERVED,
+  QUALITY_PASSED,
   PAYMENT_AUTHORIZED,
   FULFILLMENT_ASSIGNED,
   PICKING,
@@ -26,6 +27,7 @@ public enum OrderStatus {
       List.of(
           PENDING,
           INVENTORY_RESERVED,
+          QUALITY_PASSED,
           PAYMENT_AUTHORIZED,
           FULFILLMENT_ASSIGNED,
           PICKING,

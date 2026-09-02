@@ -8,6 +8,7 @@ package com.ahmedali.fulfillops.order.domain;
  */
 public enum OrderCancelledReasonCode {
   INVENTORY_REJECTED,
+  QUALITY_FAILED,
   PAYMENT_DECLINED,
   FULFILLMENT_CANCELLED,
   CUSTOMER_REQUESTED,

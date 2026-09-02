@@ -54,7 +54,7 @@ class FulfillmentAssignmentIT {
     UUID orderId = UUID.randomUUID();
     UUID correlationId = UUID.randomUUID();
 
-    deliverPaymentAuthorized(UUID.randomUUID(), orderId, correlationId);
+    deliverQualityPassed(UUID.randomUUID(), orderId, correlationId);
 
     Fulfillment fulfillment = fulfillmentRepository.findByOrderId(orderId).orElseThrow();
     assertThat(fulfillment.getStatus()).isEqualTo(FulfillmentStatus.ASSIGNED);
@@ -71,7 +71,7 @@ class FulfillmentAssignmentIT {
     UUID orderId = UUID.randomUUID();
     UUID correlationId = UUID.randomUUID();
     UUID eventId = UUID.randomUUID();
-    String envelopeJson = paymentAuthorizedEnvelopeJson(eventId, orderId, correlationId);
+    String envelopeJson = qualityPassedEnvelopeJson(eventId, orderId, correlationId);
 
     paymentAuthorizedListener.onMessage(envelopeJson);
     paymentAuthorizedListener.onMessage(envelopeJson);
@@ -92,12 +92,12 @@ class FulfillmentAssignmentIT {
     assertThat(assignedEventCount).isEqualTo(1);
   }
 
-  private void deliverPaymentAuthorized(UUID eventId, UUID orderId, UUID correlationId) {
+    private void deliverQualityPassed(UUID eventId, UUID orderId, UUID correlationId) {
     paymentAuthorizedListener.onMessage(
-        paymentAuthorizedEnvelopeJson(eventId, orderId, correlationId));
+      qualityPassedEnvelopeJson(eventId, orderId, correlationId));
   }
 
-  private String paymentAuthorizedEnvelopeJson(UUID eventId, UUID orderId, UUID correlationId) {
+    private String qualityPassedEnvelopeJson(UUID eventId, UUID orderId, UUID correlationId) {
     Map<String, Object> payload =
         Map.of(
             "paymentId", UUID.randomUUID().toString(),
@@ -105,13 +105,13 @@ class FulfillmentAssignmentIT {
     EventEnvelope envelope =
         new EventEnvelope(
             eventId,
-            "PaymentAuthorized",
+            "QualityPassed",
             1,
             Instant.now(),
             correlationId,
             UUID.randomUUID(),
             orderId,
-            "payment-service",
+            "quality-service",
             objectMapper.valueToTree(payload));
     return objectMapper.writeValueAsString(envelope);
   }

@@ -23,7 +23,7 @@ public class PaymentAuthorizedListener {
 
   private static final Logger log = LoggerFactory.getLogger(PaymentAuthorizedListener.class);
   private static final String CONSUMER_NAME = "fulfillment-service.payment-authorized";
-  private static final String PAYMENT_AUTHORIZED_EVENT_TYPE = "PaymentAuthorized";
+  private static final String QUALITY_PASSED_EVENT_TYPE = "QualityPassed";
 
   private final InboxEventRepository inboxEventRepository;
   private final FulfillmentAssignmentService fulfillmentAssignmentService;
@@ -51,7 +51,8 @@ public class PaymentAuthorizedListener {
   @Transactional
   public void onMessage(String envelopeJson) {
     EventEnvelope envelope = objectMapper.readValue(envelopeJson, EventEnvelope.class);
-    if (!PAYMENT_AUTHORIZED_EVENT_TYPE.equals(envelope.eventType())) {
+    if (!QUALITY_PASSED_EVENT_TYPE.equals(envelope.eventType())
+      && !"PaymentAuthorized".equals(envelope.eventType())) {
       log.debug("ignoring event type={} on the payment events topic", envelope.eventType());
       return;
     }
@@ -63,7 +64,7 @@ public class PaymentAuthorizedListener {
       InboxEventId id = new InboxEventId(envelope.eventId(), CONSUMER_NAME);
       if (inboxEventRepository.existsById(id)) {
         log.info(
-            "duplicate delivery of PaymentAuthorized for order {}, already processed, skipping",
+            "duplicate delivery of QualityPassed for order {}, already processed, skipping",
             envelope.aggregateId());
         metrics.recordDuplicate(envelope.eventType());
         return;
@@ -84,7 +85,7 @@ public class PaymentAuthorizedListener {
       }
 
       inboxEventRepository.save(new InboxEvent(id, envelope.eventType(), envelope.aggregateId()));
-      log.info("processed PaymentAuthorized for order {}", envelope.aggregateId());
+      log.info("processed QualityPassed for order {}", envelope.aggregateId());
     } finally {
       MDC.remove("correlationId");
       MDC.remove("eventId");

@@ -26,6 +26,7 @@ public class PaymentDeclinedListener {
 
   private static final Logger log = LoggerFactory.getLogger(PaymentDeclinedListener.class);
   private static final String CONSUMER_NAME = "inventory-service.payment-declined";
+  private static final String QUALITY_FAILED_EVENT_TYPE = "QualityFailed";
   private static final String PAYMENT_DECLINED_EVENT_TYPE = "PaymentDeclined";
 
   private final InboxEventRepository inboxEventRepository;
@@ -63,7 +64,8 @@ public class PaymentDeclinedListener {
   @Transactional
   public void onMessage(String envelopeJson) {
     EventEnvelope envelope = objectMapper.readValue(envelopeJson, EventEnvelope.class);
-    if (!PAYMENT_DECLINED_EVENT_TYPE.equals(envelope.eventType())) {
+    if (!QUALITY_FAILED_EVENT_TYPE.equals(envelope.eventType())
+      && !PAYMENT_DECLINED_EVENT_TYPE.equals(envelope.eventType())) {
       log.debug("ignoring event type={} on the payment events topic", envelope.eventType());
       return;
     }
@@ -75,7 +77,7 @@ public class PaymentDeclinedListener {
       InboxEventId id = new InboxEventId(envelope.eventId(), CONSUMER_NAME);
       if (inboxEventRepository.existsById(id)) {
         log.info(
-            "duplicate delivery of PaymentDeclined for order {}, already processed, skipping",
+            "duplicate delivery of QualityFailed for order {}, already processed, skipping",
             envelope.aggregateId());
         metrics.recordDuplicate(envelope.eventType());
         return;
@@ -85,7 +87,9 @@ public class PaymentDeclinedListener {
         if (reservationRepository.findByOrderId(envelope.aggregateId()).isPresent()) {
           reservationReleaseService.release(
               envelope.aggregateId(),
-              ReleaseReasonCode.PAYMENT_DECLINED,
+                envelope.eventType().equals(QUALITY_FAILED_EVENT_TYPE)
+                  ? ReleaseReasonCode.QUALITY_FAILED
+                  : ReleaseReasonCode.PAYMENT_DECLINED,
               envelope.correlationId(),
               envelope.eventId());
         } else {
@@ -104,7 +108,7 @@ public class PaymentDeclinedListener {
       }
 
       inboxEventRepository.save(new InboxEvent(id, envelope.eventType(), envelope.aggregateId()));
-      log.info("processed PaymentDeclined for order {}", envelope.aggregateId());
+      log.info("processed QualityFailed for order {}", envelope.aggregateId());
     } finally {
       MDC.remove("correlationId");
       MDC.remove("eventId");

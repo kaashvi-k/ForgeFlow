@@ -65,7 +65,7 @@ class PaymentAuthorizedListenerRetryIT {
     UUID orderId = UUID.randomUUID();
     UUID eventId = UUID.randomUUID();
     kafkaTemplate.send(
-        paymentEventsTopic, orderId.toString(), envelope(eventId, "PaymentAuthorized", orderId));
+        paymentEventsTopic, orderId.toString(), envelope(eventId, "QualityPassed", orderId));
 
     verify(fulfillmentAssignmentService, timeout(20_000).times(3))
         .assign(eq(orderId), any(), any());

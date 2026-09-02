@@ -118,8 +118,8 @@ public class OrderCancellationService {
         OrderStatus status = order.getStatus();
         boolean inventoryReleaseRequired = status != OrderStatus.PENDING;
         boolean paymentRefundRequired =
-            status == OrderStatus.PAYMENT_AUTHORIZED
-                || status == OrderStatus.FULFILLMENT_ASSIGNED
+          status == OrderStatus.PAYMENT_AUTHORIZED
+            || status == OrderStatus.FULFILLMENT_ASSIGNED
                 || status == OrderStatus.PICKING
                 || status == OrderStatus.PACKED;
         boolean fulfillmentCancelRequired =

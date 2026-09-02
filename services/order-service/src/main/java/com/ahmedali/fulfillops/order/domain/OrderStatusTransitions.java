@@ -27,7 +27,14 @@ public final class OrderStatusTransitions {
           Map.entry(
               OrderStatus.INVENTORY_RESERVED,
               Set.of(
+                  OrderStatus.QUALITY_PASSED,
                   OrderStatus.PAYMENT_AUTHORIZED,
+                  OrderStatus.CANCELLATION_PENDING,
+                  OrderStatus.REQUIRES_REVIEW)),
+          Map.entry(
+                  OrderStatus.QUALITY_PASSED,
+              Set.of(
+                  OrderStatus.FULFILLMENT_ASSIGNED,
                   OrderStatus.CANCELLATION_PENDING,
                   OrderStatus.REQUIRES_REVIEW)),
           Map.entry(

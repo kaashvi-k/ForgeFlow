@@ -61,8 +61,8 @@ class CancellationSagaIT {
     inventoryEventsListener.onMessage(envelope("InventoryReserved", order.getOrderId(), Map.of()));
     assertStatus(order.getOrderId(), OrderStatus.INVENTORY_RESERVED);
 
-    paymentEventsListener.onMessage(envelope("PaymentAuthorized", order.getOrderId(), Map.of()));
-    assertStatus(order.getOrderId(), OrderStatus.PAYMENT_AUTHORIZED);
+    paymentEventsListener.onMessage(envelope("QualityPassed", order.getOrderId(), Map.of()));
+    assertStatus(order.getOrderId(), OrderStatus.QUALITY_PASSED);
 
     fulfillmentEventsListener.onMessage(
         envelope("FulfillmentAssigned", order.getOrderId(), Map.of()));
@@ -99,18 +99,20 @@ class CancellationSagaIT {
   }
 
   @Test
-  void paymentDeclineWaitsForInventoryReleaseBeforeCancelling() {
+  void qualityFailureWaitsForInventoryReleaseBeforeCancelling() {
     Order order = seedOrder(OrderStatus.INVENTORY_RESERVED);
 
     paymentEventsListener.onMessage(
         envelope(
-            "PaymentDeclined",
+            "QualityFailed",
             order.getOrderId(),
             Map.of(
                 "amount",
                 Map.of("currencyCode", "USD", "amount", "10.00"),
                 "reasonCode",
-                "SIMULATED_CARD_DECLINED")));
+                "FAILED_INSPECTION",
+                "reasonDetail",
+                "inspection failed")));
     assertStatus(order.getOrderId(), OrderStatus.CANCELLATION_PENDING);
 
     inventoryEventsListener.onMessage(
@@ -123,7 +125,7 @@ class CancellationSagaIT {
                 "items",
                 java.util.List.of(Map.of("sku", "WIDGET-1", "quantity", 1)),
                 "reasonCode",
-                "PAYMENT_DECLINED")));
+                "QUALITY_FAILED")));
     assertStatus(order.getOrderId(), OrderStatus.CANCELLED);
   }
 
@@ -146,7 +148,7 @@ class CancellationSagaIT {
     assertThatThrownBy(
             () ->
                 paymentEventsListener.onMessage(
-                    envelope("PaymentAuthorized", order.getOrderId(), Map.of())))
+                    envelope("QualityPassed", order.getOrderId(), Map.of())))
         .isInstanceOf(OrderMilestoneTooEarlyException.class);
     assertStatus(order.getOrderId(), OrderStatus.PENDING);
   }
