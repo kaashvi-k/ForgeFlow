@@ -1,6 +1,6 @@
 package com.ahmedali.fulfillops.payment.messaging;
 
-import com.ahmedali.fulfillops.payment.service.AuthorizationService;
+import com.ahmedali.fulfillops.payment.service.QualityInspectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -24,21 +24,21 @@ import tools.jackson.databind.ObjectMapper;
 public class InventoryReservedListener {
 
   private static final Logger log = LoggerFactory.getLogger(InventoryReservedListener.class);
-  private static final String CONSUMER_NAME = "payment-service.inventory-reserved";
+  private static final String CONSUMER_NAME = "quality-service.inventory-reserved";
   private static final String INVENTORY_RESERVED_EVENT_TYPE = "InventoryReserved";
 
   private final InboxEventRepository inboxEventRepository;
-  private final AuthorizationService authorizationService;
+  private final QualityInspectionService qualityInspectionService;
   private final KafkaListenerMetrics metrics;
   private final ObjectMapper objectMapper;
 
   public InventoryReservedListener(
       InboxEventRepository inboxEventRepository,
-      AuthorizationService authorizationService,
+      QualityInspectionService qualityInspectionService,
       KafkaListenerMetrics metrics,
       ObjectMapper objectMapper) {
     this.inboxEventRepository = inboxEventRepository;
-    this.authorizationService = authorizationService;
+    this.qualityInspectionService = qualityInspectionService;
     this.metrics = metrics;
     this.objectMapper = objectMapper;
   }
@@ -74,7 +74,7 @@ public class InventoryReservedListener {
       }
 
       try {
-        authorizationService.authorize(
+        qualityInspectionService.inspect(
             envelope.aggregateId(), envelope.correlationId(), envelope.eventId());
       } catch (RuntimeException processingFailure) {
         log.warn(

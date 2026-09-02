@@ -15,7 +15,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Wires Resilience4j's framework-agnostic core libraries (resilience4j-circuitbreaker,
@@ -30,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
  * constructed registry would silently bind metrics to an empty registry that never sees a real
  * call.
  */
-@Configuration
 public class PaymentProviderResilienceConfig {
 
   private static final String PROVIDER_NAME = "payment-provider";

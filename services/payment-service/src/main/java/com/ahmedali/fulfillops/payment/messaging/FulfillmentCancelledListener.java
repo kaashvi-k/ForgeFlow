@@ -10,7 +10,6 @@ import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -22,7 +21,6 @@ import tools.jackson.databind.ObjectMapper;
  * has authorized. Ignores every other newStatus on this topic
  * (PICKING/PACKED/DISPATCHED/DELIVERED).
  */
-@Component
 public class FulfillmentCancelledListener {
 
   private static final Logger log = LoggerFactory.getLogger(FulfillmentCancelledListener.class);

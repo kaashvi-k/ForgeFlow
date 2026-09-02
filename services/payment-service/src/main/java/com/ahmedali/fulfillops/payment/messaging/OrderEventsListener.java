@@ -1,10 +1,9 @@
 package com.ahmedali.fulfillops.payment.messaging;
 
-import com.ahmedali.fulfillops.payment.domain.OrderPaymentContext;
-import com.ahmedali.fulfillops.payment.domain.OrderPaymentContextRepository;
-import com.ahmedali.fulfillops.payment.domain.RefundReasonCode;
-import com.ahmedali.fulfillops.payment.service.RefundService;
-import java.math.BigDecimal;
+import com.ahmedali.fulfillops.payment.domain.OrderQualityContext;
+import com.ahmedali.fulfillops.payment.domain.OrderQualityContextRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +31,11 @@ import tools.jackson.databind.ObjectMapper;
 public class OrderEventsListener {
 
   private static final Logger log = LoggerFactory.getLogger(OrderEventsListener.class);
-  private static final String CONSUMER_NAME = "payment-service.order-events";
+  private static final String CONSUMER_NAME = "quality-service.order-events";
   private static final String ORDER_PLACED_EVENT_TYPE = "OrderPlaced";
-  private static final String CANCELLATION_REQUESTED_EVENT_TYPE = "OrderCancellationRequested";
 
   private final InboxEventRepository inboxEventRepository;
-  private final OrderPaymentContextRepository orderPaymentContextRepository;
-  private final RefundService refundService;
+  private final OrderQualityContextRepository orderQualityContextRepository;
   private final DeadLetterEventRecorder deadLetterEventRecorder;
   private final KafkaListenerMetrics metrics;
   private final ObjectMapper objectMapper;
@@ -46,15 +43,13 @@ public class OrderEventsListener {
 
   public OrderEventsListener(
       InboxEventRepository inboxEventRepository,
-      OrderPaymentContextRepository orderPaymentContextRepository,
-      RefundService refundService,
+      OrderQualityContextRepository orderQualityContextRepository,
       DeadLetterEventRecorder deadLetterEventRecorder,
       KafkaListenerMetrics metrics,
       ObjectMapper objectMapper,
       @Value("${app.messaging.order-events-topic}") String topic) {
     this.inboxEventRepository = inboxEventRepository;
-    this.orderPaymentContextRepository = orderPaymentContextRepository;
-    this.refundService = refundService;
+    this.orderQualityContextRepository = orderQualityContextRepository;
     this.deadLetterEventRecorder = deadLetterEventRecorder;
     this.metrics = metrics;
     this.objectMapper = objectMapper;
@@ -110,10 +105,7 @@ public class OrderEventsListener {
   private void dispatch(EventEnvelope envelope) {
     switch (envelope.eventType()) {
       case ORDER_PLACED_EVENT_TYPE ->
-          orderPaymentContextRepository.save(parseContextOrFailNonRetryably(envelope));
-      case CANCELLATION_REQUESTED_EVENT_TYPE ->
-          refundService.refundForCompensation(
-              envelope.aggregateId(), RefundReasonCode.ORDER_CANCELLED, envelope.correlationId());
+          orderQualityContextRepository.save(parseContextOrFailNonRetryably(envelope));
       default ->
           log.debug(
               "ignoring unrecognized event type={} on the order events topic",
@@ -138,15 +130,24 @@ public class OrderEventsListener {
    * it's wrapped as non-retryable and routed straight to the DLT instead of wasting the retry
    * budget on something that can never succeed.
    */
-  private static OrderPaymentContext parseContextOrFailNonRetryably(EventEnvelope envelope) {
+  private static OrderQualityContext parseContextOrFailNonRetryably(EventEnvelope envelope) {
     try {
       JsonNode payload = envelope.payload();
       UUID customerId = UUID.fromString(payload.get("customerId").asString());
-      JsonNode totalAmount = payload.get("totalAmount");
-      BigDecimal amount = new BigDecimal(totalAmount.get("amount").asString());
-      String currencyCode = totalAmount.get("currencyCode").asString();
-      return new OrderPaymentContext(
-          envelope.aggregateId(), customerId, amount, currencyCode, envelope.correlationId());
+      JsonNode items = payload.get("items");
+      if (items == null || !items.isArray() || items.isEmpty()) {
+        throw new IllegalArgumentException("OrderPlaced items must be a non-empty array");
+      }
+      List<String> skus = new ArrayList<>();
+      for (JsonNode item : items) {
+        JsonNode sku = item.get("sku");
+        if (sku == null || sku.asString().isBlank()) {
+          throw new IllegalArgumentException("OrderPlaced item is missing sku");
+        }
+        skus.add(sku.asString());
+      }
+      return new OrderQualityContext(
+          envelope.aggregateId(), customerId, String.join(",", skus), envelope.correlationId());
     } catch (RuntimeException malformed) {
       throw new NonRetryableEventProcessingException(
           "malformed OrderPlaced payload for event "

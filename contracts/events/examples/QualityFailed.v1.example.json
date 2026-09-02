@@ -1,0 +1,11 @@
+{
+  "eventId": "1132d487-4c5a-4385-825f-b0134a6c6352",
+  "eventType": "QualityFailed",
+  "eventVersion": 1,
+  "occurredAt": "2026-09-02T10:00:00Z",
+  "correlationId": "4f12ccca-9c34-4f5d-8a14-b5b8c2e5b94e",
+  "causationId": "e9d0558f-79e2-460d-aed2-e56c54eef1af",
+  "aggregateId": "82108a7d-97e5-4e2b-ae3f-5d99d57cf328",
+  "producer": "quality-service",
+  "payload": { "inspectionId": "2328c89c-d68a-4e83-8d18-b17d688d4b0f", "reasonCode": "QUALITY_RULE_REJECTED", "reasonDetail": "One or more requested SKUs are marked as failing the deterministic quality rule." }
+}

@@ -42,7 +42,7 @@ public class SecurityConfig {
                     .requestMatchers(
                         "/actuator/health/**", "/actuator/info", "/actuator/prometheus")
                     .permitAll()
-                    .requestMatchers("/api/v1/payments/**")
+                    .requestMatchers("/api/v1/quality-inspections/**")
                     .hasAnyRole("OPERATOR", "ADMIN")
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")

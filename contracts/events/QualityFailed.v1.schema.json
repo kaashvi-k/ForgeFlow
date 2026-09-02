@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fulfillops.dev/contracts/events/QualityFailed.v1.schema.json",
+  "title": "QualityFailed.v1",
+  "description": "Quality Service recorded a failed inspection after inventory was reserved.",
+  "allOf": [
+    { "$ref": "EventEnvelope.v1.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "eventType": { "const": "QualityFailed" },
+        "eventVersion": { "const": 1 },
+        "producer": { "const": "quality-service" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["inspectionId", "reasonCode", "reasonDetail"],
+          "properties": {
+            "inspectionId": { "type": "string", "format": "uuid" },
+            "reasonCode": { "type": "string", "minLength": 1, "maxLength": 64 },
+            "reasonDetail": { "type": "string", "minLength": 1, "maxLength": 500 }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import com.ahmedali.fulfillops.payment.service.IdempotencyKeyConflictException;
 import com.ahmedali.fulfillops.payment.service.InvalidRefundRequestException;
 import com.ahmedali.fulfillops.payment.service.InvalidRefundStateException;
 import com.ahmedali.fulfillops.payment.service.PaymentNotFoundException;
+import com.ahmedali.fulfillops.payment.service.QualityInspectionNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(PaymentNotFoundException.class)
   public ProblemDetail handlePaymentNotFound(PaymentNotFoundException e) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+  }
+
+  @ExceptionHandler(QualityInspectionNotFoundException.class)
+  public ProblemDetail handleQualityInspectionNotFound(QualityInspectionNotFoundException e) {
     return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
   }
 

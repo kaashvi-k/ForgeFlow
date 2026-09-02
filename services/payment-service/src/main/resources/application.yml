@@ -1,6 +1,6 @@
 spring:
   application:
-    name: payment-service
+    name: quality-service
   task:
     scheduling:
       pool:
@@ -17,7 +17,7 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
     consumer:
-      group-id: payment-service
+      group-id: quality-service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
@@ -76,19 +76,7 @@ logging:
 
 app:
   messaging:
-    topic: fulfillops.payment.events
+    topic: fulfillops.quality.events
     order-events-topic: fulfillops.order.events
     inventory-events-topic: fulfillops.inventory.events
     fulfillment-events-topic: fulfillops.fulfillment.events
-  payment:
-    provider:
-      retry:
-        max-attempts: 3
-        initial-interval-ms: 200
-        backoff-multiplier: 2.0
-      circuit-breaker:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50
-        wait-duration-in-open-state-ms: 30000
-        permitted-calls-in-half-open-state: 3

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 /**
  * Orchestrates one authorization attempt for an order: looks up the local order context built from
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
  * here — it propagates to InventoryReservedListener, whose @RetryableTopic gives Kafka-level
  * redelivery a later, less contended, chance.
  */
-@Service
 public class AuthorizationService {
 
   private static final Logger log = LoggerFactory.getLogger(AuthorizationService.class);

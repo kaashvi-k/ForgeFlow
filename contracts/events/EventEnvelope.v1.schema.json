@@ -56,7 +56,7 @@
     },
     "producer": {
       "type": "string",
-      "enum": ["order-service", "inventory-service", "payment-service", "fulfillment-service"],
+      "enum": ["order-service", "inventory-service", "payment-service", "quality-service", "fulfillment-service"],
       "description": "The service that published this event."
     },
     "payload": {

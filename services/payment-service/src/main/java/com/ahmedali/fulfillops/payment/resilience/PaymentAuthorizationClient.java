@@ -11,7 +11,6 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.retry.Retry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import org.springframework.stereotype.Component;
 
 /**
  * Decorates PaymentProviderPort calls with a bounded retry and a circuit breaker (see
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Component;
  * retryExceptions, so it fails fast on the first attempt instead of retrying against a circuit that
  * has already decided not to let calls through.
  */
-@Component
 public class PaymentAuthorizationClient {
 
   private final PaymentProviderPort providerPort;

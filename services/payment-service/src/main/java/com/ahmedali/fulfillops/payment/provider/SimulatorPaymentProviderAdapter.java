@@ -2,7 +2,6 @@ package com.ahmedali.fulfillops.payment.provider;
 
 import com.ahmedali.fulfillops.payment.domain.SimulatorRule;
 import com.ahmedali.fulfillops.payment.domain.SimulatorRuleRepository;
-import org.springframework.stereotype.Component;
 
 /**
  * The production PaymentProviderPort: a deterministic, fictional simulator, never a real payment
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
  * processor sandboxes use magic test amounts (see V2__payments.sql). Any amount with no matching
  * rule approves.
  */
-@Component
 public class SimulatorPaymentProviderAdapter implements PaymentProviderPort {
 
   private final SimulatorRuleRepository simulatorRuleRepository;
